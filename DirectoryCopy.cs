@@ -6,21 +6,35 @@ namespace Hakase
     public static class HakaseUtility
     {
         //ディレクトリのコピー
-        public static void DirectoryCopy(string sourcePath, string destinationPath)
+        public static void DirectoryCopy
+        (
+            string sourcePath, //コピー元ファイルパス
+            string destinationPath //コピー先ファイルパス
+        )
         {
             //コピー元が無ければエラー
-            if (!Directory.Exists(sourcePath)) throw new IOException();
+            if (!Directory.Exists(sourcePath)) 
+                throw new IOException();
             //コピー先が無ければ新たに作る
-            if (!Directory.Exists(destinationPath)) Directory.CreateDirectory(destinationPath, Directory.GetAccessControl(sourcePath));
-            //ファイルをコピー
-            foreach (var file in Directory.GetFiles(sourcePath))
+            if (!Directory.Exists(destinationPath)) 
             {
-                File.Copy(file, file.Replace(sourcePath, destinationPath));
+                //フォルダのセキュリティ情報取得
+                var access = Directory.GetAccessControl(sourcePath);
+                Directory.CreateDirectory(destinationPath,access);
+            }
+            //ファイルをコピー
+            foreach(var file in Directory.GetFiles(sourcePath))
+            {
+                //ファイルコピー先パスを構築
+                var copyto = file.Replace(sourcePath, destinationPath);
+                File.Copy(file, copyto);
             }
             //フォルダは再起でコピー
-            foreach (var dic in Directory.GetDirectories(sourcePath))
+            foreach(var dic in Directory.GetDirectories(sourcePath))
             {
-                DirectoryCopy(dic, dic.Replace(sourcePath, destinationPath));
+                //フォルダコピー先パスを構築
+                var copyto = dic.Replace(sourcePath, destinationPath);
+                DirectoryCopy(dic,copyto);
             }
         }
     }
